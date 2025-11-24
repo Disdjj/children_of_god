@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { GameState, EndingType, Option, LocalizedString, Language } from './types';
+import { GameState, EndingType, Option, LocalizedString, StatsModifiers, Language } from './types';
 import { ROUNDS, ENDINGS } from './data';
-import { ShieldAlert, RefreshCw, ChevronRight, Terminal, Globe } from 'lucide-react';
+import { ShieldAlert, RefreshCw, ChevronRight, Terminal, Globe, Lock, Heart, Scale, Users } from 'lucide-react';
 
 const INITIAL_STATE: GameState = {
   currentRoundId: 1,
@@ -12,41 +13,61 @@ const INITIAL_STATE: GameState = {
   showingFeedback: false,
   currentFeedback: null,
   currentOptionTrigger: null,
-  language: 'zh' // Default to Chinese
+  language: 'zh',
+  stats: {
+    sys: 0, // System Faith
+    obe: 0, // Obedience
+    fam: 0  // Family Bond
+  }
 };
 
-// Static UI Strings
 const UI_TEXT = {
-  title: { zh: "神的孩子们", en: "God's Children" },
-  subtitle: { zh: "系统日志", en: "System.Log" },
-  rec: { zh: "记录", en: "REC" },
-  initiate: { zh: "启动", en: "INITIATE" },
-  option: { zh: "选项", en: "OPTION" },
-  feedbackTitle: { zh: "系统反馈", en: "System Feedback" },
-  terminalState: { zh: "抵达终局", en: "TERMINAL STATE REACHED" },
-  continue: { zh: "继续", en: "CONTINUE" },
-  restart: { zh: "重启模拟", en: "Restart Simulation" },
-  terminated: { zh: "已终止", en: "TERMINATED" },
-  imgRef: { zh: "图像参考", en: "IMG_REF" },
+  title: { zh: "神的孩子们", en: "God's Children", ja: "神の子ら", ko: "신의 아이들" },
+  subtitle: { zh: "系统日志", en: "System.Log", ja: "システムログ", ko: "시스템 로그" },
+  rec: { zh: "记录", en: "REC", ja: "REC", ko: "REC" },
+  initiate: { zh: "启动", en: "INITIATE", ja: "起動", ko: "기동" },
+  option: { zh: "选项", en: "OPTION", ja: "選択", ko: "선택" },
+  feedbackTitle: { zh: "系统反馈", en: "System Feedback", ja: "システムフィードバック", ko: "시스템 피드백" },
+  terminalState: { zh: "抵达终局", en: "TERMINAL STATE REACHED", ja: "終局到達", ko: "종국 도달" },
+  continue: { zh: "继续", en: "CONTINUE", ja: "次へ", ko: "계속" },
+  restart: { zh: "重启模拟", en: "Restart Simulation", ja: "シミュレーション再起動", ko: "시뮬레이션 재시작" },
+  terminated: { zh: "已终止", en: "TERMINATED", ja: "終了", ko: "종료" },
+  imgRef: { zh: "图像参考", en: "IMG_REF", ja: "画像参照", ko: "이미지_참조" },
   introQuote: {
     zh: "“没有救赎。只有通往同一终点的不同选择。”",
-    en: "\"There is no salvation. Only choices that lead to the same destination.\""
+    en: "\"There is no salvation. Only choices that lead to the same destination.\"",
+    ja: "「救いはない。あるのは、同じ結末に至る異なる選択だけだ。」",
+    ko: "\"구원은 없다. 오직 같은 결말로 향하는 다른 선택만이 있을 뿐.\""
   },
   systemWarning: {
     zh: "系统警告：",
-    en: "SYSTEM WARNING:"
+    en: "SYSTEM WARNING:",
+    ja: "システム警告：",
+    ko: "시스템 경고:"
   },
   warningBody: {
     zh: ["社会安全网失效模拟已加载。", "对象：山上彻也。", "目标：生存。"],
-    en: ["Simulation of social safety net failure loaded.", "Subject: Tetsuya Yamagami.", "Objective: Survive."]
+    en: ["Simulation of social safety net failure loaded.", "Subject: Tetsuya Yamagami.", "Objective: Survive."],
+    ja: ["社会安全網破綻シミュレーションをロード。", "被験体：山上徹也。", "目標：生存。"],
+    ko: ["사회 안전망 붕괴 시뮬레이션 로드됨.", "대상: 야마가미 테츠야.", "목표: 생존."]
   },
   endingDate: {
     zh: "2022年7月8日。改变现代日本的事件。安全网一个个失效了。",
-    en: "July 8, 2022. The event that changed modern Japan. The safety nets failed, one by one."
+    en: "July 8, 2022. The event that changed modern Japan. The safety nets failed, one by one.",
+    ja: "2022年7月8日。現代日本を変えた事件。セーフティネットは一つずつ機能不全に陥った。",
+    ko: "2022년 7월 8일. 현대 일본을 바꾼 사건. 안전망은 하나씩 붕괴되었다."
   },
   deadEnd: {
     zh: "这是一个死胡同。但时间线在别处继续。",
-    en: "This is a dead end. But the timeline continues elsewhere."
+    en: "This is a dead end. But the timeline continues elsewhere.",
+    ja: "これは袋小路だ。しかしタイムラインは他で続く。",
+    ko: "막다른 길이다. 하지만 타임라인은 다른 곳에서 계속된다."
+  },
+  locked: {
+    zh: "条件未满足",
+    en: "Condition Not Met",
+    ja: "条件未達成",
+    ko: "조건 미충족"
   }
 };
 
@@ -54,20 +75,11 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Helper to get text based on current language
   const t = (content: LocalizedString | string): string => {
     if (typeof content === 'string') return content;
     return content[gameState.language];
   };
 
-  const toggleLanguage = () => {
-    setGameState(prev => ({
-      ...prev,
-      language: prev.language === 'zh' ? 'en' : 'zh'
-    }));
-  };
-
-  // Auto-scroll when content changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -78,13 +90,34 @@ export default function App() {
     setGameState(prev => ({ ...prev, isGameStarted: true }));
   };
 
+  const updateStats = (modifiers?: StatsModifiers) => {
+    if (!modifiers) return gameState.stats;
+    return {
+      sys: gameState.stats.sys + (modifiers.sys || 0),
+      obe: gameState.stats.obe + (modifiers.obe || 0),
+      fam: gameState.stats.fam + (modifiers.fam || 0)
+    };
+  };
+
+  const checkRequirements = (req?: StatsModifiers): boolean => {
+    if (!req) return true;
+    const { sys, obe, fam } = gameState.stats;
+    if (req.sys !== undefined && sys < req.sys) return false;
+    if (req.obe !== undefined && obe < req.obe) return false;
+    if (req.fam !== undefined && fam < req.fam) return false;
+    return true;
+  };
+
   const handleOptionClick = (option: Option) => {
+    const newStats = updateStats(option.modifiers);
+    
     setGameState(prev => ({
       ...prev,
       showingFeedback: true,
       currentFeedback: option.feedback,
       currentOptionTrigger: option.triggersEnding || null,
-      history: [...prev.history, option.id as any]
+      history: [...prev.history, parseInt(option.id)], // Loose parsing for history tracking
+      stats: newStats
     }));
   };
 
@@ -92,7 +125,6 @@ export default function App() {
     const { currentOptionTrigger, currentRoundId } = gameState;
 
     if (currentOptionTrigger && currentOptionTrigger !== EndingType.None) {
-      // Trigger Ending
       setGameState(prev => ({
         ...prev,
         isGameOver: true,
@@ -100,10 +132,10 @@ export default function App() {
         showingFeedback: false
       }));
     } else {
-      // Next Round
-      const nextId = currentRoundId + 1;
-      if (nextId > 30) {
-        // Fallback
+      // Logic to find next round
+      const currentIndex = ROUNDS.findIndex(r => r.id === currentRoundId);
+      if (currentIndex === -1 || currentIndex === ROUNDS.length - 1) {
+        // Fallback to True End if end of array
         setGameState(prev => ({
           ...prev,
           isGameOver: true,
@@ -111,9 +143,10 @@ export default function App() {
           showingFeedback: false
         }));
       } else {
+        const nextRound = ROUNDS[currentIndex + 1];
         setGameState(prev => ({
           ...prev,
-          currentRoundId: nextId,
+          currentRoundId: nextRound.id,
           showingFeedback: false,
           currentFeedback: null
         }));
@@ -127,6 +160,18 @@ export default function App() {
 
   const currentRound = ROUNDS.find(r => r.id === gameState.currentRoundId) || ROUNDS[0];
   const currentEnding = gameState.ending !== EndingType.None ? ENDINGS[gameState.ending] : null;
+
+  // Render Stats Indicators (Subtle)
+  const renderStats = () => {
+    if (!gameState.isGameStarted || gameState.isGameOver) return null;
+    return (
+      <div className="flex gap-4 text-[10px] font-mono text-stone-600 opacity-50 mb-2 justify-end">
+        {gameState.stats.sys > 0 && <span className="flex items-center gap-1"><Scale size={10} /> SYS:{gameState.stats.sys}</span>}
+        {gameState.stats.obe > 0 && <span className="flex items-center gap-1"><Lock size={10} /> OBE:{gameState.stats.obe}</span>}
+        {gameState.stats.fam > 0 && <span className="flex items-center gap-1"><Heart size={10} /> FAM:{gameState.stats.fam}</span>}
+      </div>
+    );
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-stone-950 text-stone-300 overflow-hidden font-serif selection:bg-red-900 selection:text-white">
@@ -144,13 +189,23 @@ export default function App() {
             <p className="text-xs font-mono text-stone-500 uppercase tracking-widest">{t(UI_TEXT.subtitle)}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-             <button 
-               onClick={toggleLanguage}
-               className="flex items-center gap-1 text-xs font-mono text-stone-500 hover:text-stone-300 transition-colors uppercase"
-             >
-               <Globe size={12} />
-               {gameState.language === 'zh' ? 'EN / 中文' : 'EN / 中文'}
-             </button>
+             <div className="flex items-center gap-2 font-mono text-xs">
+               <Globe size={10} className="text-stone-600 mr-1" />
+               {(['zh', 'en', 'ja', 'ko'] as Language[]).map((lang) => (
+                 <button
+                   key={lang}
+                   onClick={() => setGameState(prev => ({ ...prev, language: lang }))}
+                   className={`
+                     uppercase transition-colors px-1
+                     ${gameState.language === lang 
+                       ? 'text-red-500 font-bold border-b border-red-900' 
+                       : 'text-stone-600 hover:text-stone-400'}
+                   `}
+                 >
+                   {lang}
+                 </button>
+               ))}
+             </div>
              <div className="text-right font-mono text-xs text-stone-600">
                {gameState.isGameStarted && !gameState.isGameOver && (
                  <span>{t(UI_TEXT.rec)}: {currentRound.year} // R-{gameState.currentRoundId.toString().padStart(2, '0')}</span>
@@ -188,6 +243,8 @@ export default function App() {
 
           {gameState.isGameStarted && !gameState.isGameOver && (
             <div className="space-y-8 pb-20">
+              {renderStats()}
+              
               {/* Image Placeholder */}
               <div className="w-full h-64 bg-stone-900 border border-stone-800 relative overflow-hidden grayscale contrast-125 brightness-75">
                  <img 
@@ -215,21 +272,30 @@ export default function App() {
               {/* Options or Feedback */}
               {!gameState.showingFeedback ? (
                 <div className="grid gap-4 mt-8">
-                  {currentRound.options.map((opt) => (
+                  {currentRound.options.filter(opt => checkRequirements(opt.requiredStats)).map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => handleOptionClick(opt)}
-                      className="w-full text-left p-4 border border-stone-700 hover:border-red-800 hover:bg-red-900/10 transition-all duration-300 group"
+                      className={`w-full text-left p-4 border transition-all duration-300 group
+                        ${opt.requiredStats ? 'border-amber-900/50 bg-amber-950/10' : 'border-stone-700 hover:border-red-800 hover:bg-red-900/10'}
+                      `}
                     >
-                      <span className="block text-xs font-mono text-stone-600 mb-1 group-hover:text-red-500">
-                        {t(UI_TEXT.option)} {opt.id.toUpperCase()}
-                      </span>
+                      <div className="flex justify-between items-start">
+                        <span className="block text-xs font-mono text-stone-600 mb-1 group-hover:text-red-500">
+                          {t(UI_TEXT.option)} {opt.id.toUpperCase()}
+                        </span>
+                        {opt.requiredStats && (
+                          <span className="text-[10px] uppercase tracking-widest text-amber-500/50 border border-amber-900/50 px-1">
+                             Critical Path Unlocked
+                          </span>
+                        )}
+                      </div>
                       <span className="text-md text-stone-200">{t(opt.text)}</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="mt-8 border border-red-900/50 bg-red-950/10 p-6 relative overflow-hidden">
+                <div className="mt-8 border border-red-900/50 bg-red-950/10 p-6 relative overflow-hidden animate-fade-in">
                   <div className="absolute top-0 left-0 w-1 h-full bg-red-900"></div>
                   <div className="flex items-start gap-3">
                     <Terminal className="w-5 h-5 text-red-700 mt-1 shrink-0" />
@@ -254,8 +320,9 @@ export default function App() {
 
           {gameState.isGameOver && currentEnding && (
             <div className="h-full flex flex-col justify-center items-center text-center space-y-8 animate-fade-in pb-10">
-              <div className="w-20 h-20 border-2 border-red-800 rounded-full flex items-center justify-center text-red-800 mb-4">
-                <ShieldAlert size={40} />
+              <div className={`w-20 h-20 border-2 rounded-full flex items-center justify-center mb-4 
+                  ${gameState.ending === EndingType.E0_Fantasy ? 'border-amber-500 text-amber-500' : 'border-red-800 text-red-800'}`}>
+                {gameState.ending === EndingType.E0_Fantasy ? <Heart size={40} /> : <ShieldAlert size={40} />}
               </div>
               
               <div className="space-y-2">
@@ -263,18 +330,55 @@ export default function App() {
                 <p className="text-red-500 font-mono text-sm tracking-widest uppercase">{currentEnding.id} // {t(UI_TEXT.terminated)}</p>
               </div>
 
-              <div className="max-w-md p-6 border border-stone-800 bg-stone-900 space-y-4">
+              <div className={`max-w-md p-6 border bg-stone-900 space-y-4
+                  ${gameState.ending === EndingType.E0_Fantasy ? 'border-amber-500/30' : 'border-stone-800'}`}>
                 <p className="text-lg text-stone-300 italic">"{t(currentEnding.description)}"</p>
                 <div className="h-px w-full bg-stone-800"></div>
                 <p className="font-bold text-red-700">{t(currentEnding.cause)}</p>
               </div>
 
+              {/* True End Special Content: The Three Bubbles */}
+              {gameState.ending === EndingType.True_End && (
+                <div className="w-full max-w-md space-y-6 mt-8 font-serif italic">
+                  <div className="flex justify-start opacity-0 animate-fade-in" style={{animationDelay: '0.8s', animationFillMode: 'forwards'}}>
+                    <div className="bg-stone-800/50 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-700/50 max-w-[80%] leading-relaxed shadow-lg shadow-black/50">
+                      {t({
+                        zh: "“对我来说，哥哥是我最喜欢的哥哥。”",
+                        en: "\"To me, my brother is my favorite brother.\"",
+                        ja: "「私にとって、兄は大好きなお兄ちゃんでした。」",
+                        ko: "\"나에게 있어서, 형은 내가 가장 좋아하는 형이었습니다.\""
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex justify-start opacity-0 animate-fade-in" style={{animationDelay: '2.0s', animationFillMode: 'forwards'}}>
+                    <div className="bg-stone-800/50 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-700/50 max-w-[80%] leading-relaxed shadow-lg shadow-black/50">
+                      {t({
+                        zh: "“是个男子汉。”",
+                        en: "\"He was a man.\"",
+                        ja: "「立派な男だった。」",
+                        ko: "\"진정한 남자였다.\""
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex justify-end opacity-0 animate-fade-in" style={{animationDelay: '3.5s', animationFillMode: 'forwards'}}>
+                    <div className="bg-red-950/20 p-4 rounded-lg rounded-br-none text-sm text-red-400 border border-red-900/30 max-w-[90%] text-right leading-relaxed shadow-lg shadow-red-900/10">
+                      {t({
+                        zh: "“对我而言，统一教还是我最爱的统一教。”",
+                        en: "\"To me, the Unification Church is still my beloved Unification Church.\"",
+                        ja: "「私にとって、統一教会はまだ愛する統一教会のままです。」",
+                        ko: "\"나에게 있어 통일교는 여전히 내가 사랑하는 통일교입니다.\""
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {gameState.ending === EndingType.True_End ? (
-                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto">
+                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto mt-8">
                     {t(UI_TEXT.endingDate)}
                  </div>
               ) : (
-                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto">
+                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto mt-8">
                     {t(UI_TEXT.deadEnd)}
                  </div>
               )}

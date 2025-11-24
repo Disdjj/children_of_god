@@ -6,10 +6,10 @@
     <title>God's Children | 神的孩子们</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Share+Tech+Mono&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Serif+KR:wght@300;400;700&family=Share+Tech+Mono&display=swap');
       
       body {
-        font-family: 'Noto Serif JP', serif;
+        font-family: 'Noto Serif JP', 'Noto Serif KR', serif;
         background-color: #0c0a09;
         color: #d6d3d1;
       }
@@ -44,6 +44,35 @@
       }
       .crt-flicker {
         animation: flicker 0.15s infinite;
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-in {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+      
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.5s ease-out forwards;
       }
     </style>
   <script type="importmap">
