@@ -1,0 +1,8 @@
+name = "children-of-god"
+compatibility_date = "2024-11-24"
+pages_build_output_dir = "dist"
+
+# 如果您想要自定义域名,可以在 Cloudflare Dashboard 中配置
+# routes = [
+#   { pattern = "example.com", custom_domain = true }
+# ]
