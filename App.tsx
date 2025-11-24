@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState, EndingType, Option, LocalizedString, StatsModifiers, Language } from './types';
 import { ROUNDS, ENDINGS } from './data';
+import { IMAGE_MAP } from './imageMap';
 import { ShieldAlert, RefreshCw, ChevronRight, Terminal, Globe, Lock, Heart, Scale, Users } from 'lucide-react';
 
 const INITIAL_STATE: GameState = {
@@ -245,15 +246,19 @@ export default function App() {
             <div className="space-y-8 pb-20">
               {renderStats()}
               
-              {/* Image Placeholder */}
-              <div className="w-full h-64 bg-stone-900 border border-stone-800 relative overflow-hidden grayscale contrast-125 brightness-75">
-                 <img 
+              {/* Scene Image */}
+              <div className="w-full h-64 bg-stone-900 border border-stone-800 relative overflow-hidden">
+                 <img
                    key={currentRound.id}
-                   src={`https://picsum.photos/800/400?grayscale&blur=2&random=${currentRound.id}`} 
+                   src={`/images/${IMAGE_MAP[currentRound.imageKeyword] || '01_funeral.png'}`}
                    alt={currentRound.imageKeyword}
-                   className="w-full h-full object-cover opacity-60 mix-blend-overlay transition-opacity duration-1000"
+                   className="w-full h-full object-contain opacity-90 transition-opacity duration-1000"
+                   onError={(e) => {
+                     // Fallback to placeholder if image fails to load
+                     e.currentTarget.src = `https://picsum.photos/800/400?grayscale&blur=2&random=${currentRound.id}`;
+                   }}
                  />
-                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent"></div>
+                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent pointer-events-none"></div>
                  <div className="absolute bottom-4 left-4 font-mono text-xs bg-black/50 px-2 py-1 text-red-500">
                     {t(UI_TEXT.imgRef)}: {currentRound.imageKeyword.toUpperCase()}
                  </div>
