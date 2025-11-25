@@ -166,7 +166,7 @@ export default function App() {
   const renderStats = () => {
     if (!gameState.isGameStarted || gameState.isGameOver) return null;
     return (
-      <div className="flex gap-4 text-[10px] font-mono text-stone-600 opacity-50 mb-2 justify-end">
+      <div className="flex gap-4 text-[10px] font-mono text-stone-300 opacity-80 mb-2 justify-end">
         {gameState.stats.sys > 0 && <span className="flex items-center gap-1"><Scale size={10} /> SYS:{gameState.stats.sys}</span>}
         {gameState.stats.obe > 0 && <span className="flex items-center gap-1"><Lock size={10} /> OBE:{gameState.stats.obe}</span>}
         {gameState.stats.fam > 0 && <span className="flex items-center gap-1"><Heart size={10} /> FAM:{gameState.stats.fam}</span>}
@@ -175,23 +175,23 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-stone-950 text-stone-100 overflow-hidden font-serif selection:bg-red-900 selection:text-white">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-[#1d1815] via-[#181310] to-[#0f0c0a] text-stone-50 overflow-hidden font-serif selection:bg-amber-200/60 selection:text-stone-900">
       {/* CRT Overlay Effects */}
-      <div className="fixed inset-0 pointer-events-none z-50 scanlines opacity-30"></div>
-      <div className="fixed inset-0 pointer-events-none z-50 crt-flicker bg-gradient-to-b from-transparent to-black opacity-10"></div>
+      <div className="fixed inset-0 pointer-events-none z-50 scanlines opacity-20"></div>
+      <div className="fixed inset-0 pointer-events-none z-50 crt-flicker bg-gradient-to-b from-transparent to-black opacity-5"></div>
       
       {/* Main Content Area */}
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-2xl h-screen flex flex-col">
         
         {/* Header */}
-        <header className="mb-6 flex justify-between items-end border-b border-stone-800 pb-2">
+        <header className="mb-6 flex justify-between items-end border-b border-stone-700/60 pb-2">
           <div>
             <h1 className="text-2xl font-bold tracking-widest text-stone-100">{t(UI_TEXT.title)}</h1>
-            <p className="text-xs font-mono text-stone-500 uppercase tracking-widest">{t(UI_TEXT.subtitle)}</p>
+            <p className="text-xs font-mono text-stone-400 uppercase tracking-widest">{t(UI_TEXT.subtitle)}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
              <div className="flex items-center gap-2 font-mono text-xs">
-               <Globe size={10} className="text-stone-600 mr-1" />
+               <Globe size={10} className="text-stone-400 mr-1" />
                {(['zh', 'en', 'ja', 'ko'] as Language[]).map((lang) => (
                  <button
                    key={lang}
@@ -200,14 +200,14 @@ export default function App() {
                      uppercase transition-colors px-1
                      ${gameState.language === lang 
                        ? 'text-red-500 font-bold border-b border-red-900' 
-                       : 'text-stone-600 hover:text-stone-400'}
+                       : 'text-stone-400 hover:text-stone-200'}
                    `}
                  >
                    {lang}
                  </button>
                ))}
              </div>
-             <div className="text-right font-mono text-xs text-stone-600">
+             <div className="text-right font-mono text-xs text-stone-400">
                {gameState.isGameStarted && !gameState.isGameOver && (
                  <span>{t(UI_TEXT.rec)}: {currentRound.year} // R-{gameState.currentRoundId.toString().padStart(2, '0')}</span>
                )}
@@ -221,11 +221,11 @@ export default function App() {
           {!gameState.isGameStarted && (
             <div className="h-full flex flex-col justify-center items-center text-center space-y-8 animate-fade-in">
               <div className="max-w-md space-y-6">
-                <p className="text-lg leading-relaxed italic text-stone-400">
+                <p className="text-lg leading-relaxed italic text-stone-200">
                   {t(UI_TEXT.introQuote)}
                 </p>
-                <div className="p-4 border border-stone-800 bg-stone-900/50 text-xs font-mono text-left">
-                  <p className="text-red-900/70 mb-2">{t(UI_TEXT.systemWarning)}</p>
+                <div className="p-4 border border-stone-700 bg-stone-800/70 text-xs font-mono text-left text-stone-100">
+                  <p className="text-red-500/80 mb-2">{t(UI_TEXT.systemWarning)}</p>
                   {UI_TEXT.warningBody[gameState.language].map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
@@ -247,18 +247,18 @@ export default function App() {
               {renderStats()}
               
               {/* Scene Image */}
-              <div className="w-full h-64 bg-stone-900 border border-stone-800 relative overflow-hidden">
+              <div className="w-full h-64 bg-stone-800/70 border border-stone-700 relative overflow-hidden shadow-lg shadow-black/40">
                  <img
                    key={currentRound.id}
                    src={`/images/${IMAGE_MAP[currentRound.imageKeyword] || '01_funeral.png'}`}
                    alt={currentRound.imageKeyword}
-                   className="w-full h-full object-contain opacity-90 transition-opacity duration-1000"
+                   className="w-full h-full object-contain opacity-100 transition-opacity duration-1000"
                    onError={(e) => {
                      // Fallback to placeholder if image fails to load
                      e.currentTarget.src = `https://picsum.photos/800/400?grayscale&blur=2&random=${currentRound.id}`;
                    }}
                  />
-                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent pointer-events-none"></div>
+                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/10 to-transparent pointer-events-none"></div>
                  <div className="absolute bottom-4 left-4 font-mono text-xs bg-black/50 px-2 py-1 text-red-500">
                     {t(UI_TEXT.imgRef)}: {currentRound.imageKeyword.toUpperCase()}
                  </div>
@@ -266,10 +266,10 @@ export default function App() {
 
               {/* Scenario Text */}
               <div className="space-y-4 animate-slide-up">
-                <h2 className="text-xl font-bold text-stone-200 border-l-2 border-red-900 pl-4">
+                <h2 className="text-xl font-bold text-stone-50 border-l-2 border-red-700 pl-4">
                   {t(currentRound.title)}
                 </h2>
-                <p className="text-lg leading-loose text-stone-300">
+                <p className="text-lg leading-loose text-stone-100">
                   {t(currentRound.description)}
                 </p>
               </div>
@@ -282,37 +282,37 @@ export default function App() {
                       key={opt.id}
                       onClick={() => handleOptionClick(opt)}
                       className={`w-full text-left p-4 border transition-all duration-300 group
-                        ${opt.requiredStats ? 'border-amber-900/50 bg-amber-950/10' : 'border-stone-700 hover:border-red-800 hover:bg-red-900/10'}
+                        ${opt.requiredStats ? 'border-amber-700/70 bg-amber-900/15 shadow-[0_0_20px_rgba(255,193,94,0.08)]' : 'border-stone-500 bg-stone-800/40 hover:border-red-700 hover:bg-red-800/15'}
                       `}
                     >
                       <div className="flex justify-between items-start">
-                        <span className="block text-xs font-mono text-stone-600 mb-1 group-hover:text-red-500">
+                        <span className="block text-xs font-mono text-stone-300 mb-1 group-hover:text-red-400">
                           {t(UI_TEXT.option)} {opt.id.toUpperCase()}
                         </span>
                         {opt.requiredStats && (
-                          <span className="text-[10px] uppercase tracking-widest text-amber-500/50 border border-amber-900/50 px-1">
+                          <span className="text-[10px] uppercase tracking-widest text-amber-300/80 border border-amber-700/70 px-1">
                              Critical Path Unlocked
                           </span>
                         )}
                       </div>
-                      <span className="text-md text-stone-200">{t(opt.text)}</span>
+                      <span className="text-md text-stone-50">{t(opt.text)}</span>
                     </button>
                   ))}
                 </div>
               ) : (
-                <div className="mt-8 border border-red-900/50 bg-red-950/10 p-6 relative overflow-hidden animate-fade-in">
+                <div className="mt-8 border border-red-800/40 bg-red-900/15 p-6 relative overflow-hidden animate-fade-in">
                   <div className="absolute top-0 left-0 w-1 h-full bg-red-900"></div>
                   <div className="flex items-start gap-3">
                     <Terminal className="w-5 h-5 text-red-700 mt-1 shrink-0" />
                     <div className="space-y-4 w-full">
                       <p className="font-mono text-xs text-red-700 uppercase">{t(UI_TEXT.feedbackTitle)}</p>
-                      <p className="text-lg font-medium text-stone-200">
+                      <p className="text-lg font-medium text-stone-50">
                         {gameState.currentFeedback ? t(gameState.currentFeedback) : ''}
                       </p>
                       
                       <button
                         onClick={proceed}
-                        className="mt-6 flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors ml-auto"
+                        className="mt-6 flex items-center gap-2 text-sm font-bold text-stone-200 hover:text-white transition-colors ml-auto"
                       >
                         {gameState.currentOptionTrigger ? t(UI_TEXT.terminalState) : t(UI_TEXT.continue)} <ChevronRight size={14} />
                       </button>
@@ -335,18 +335,18 @@ export default function App() {
                 <p className="text-red-500 font-mono text-sm tracking-widest uppercase">{currentEnding.id} // {t(UI_TEXT.terminated)}</p>
               </div>
 
-              <div className={`max-w-md p-6 border bg-stone-900 space-y-4
-                  ${gameState.ending === EndingType.E0_Fantasy ? 'border-amber-500/30' : 'border-stone-800'}`}>
-                <p className="text-lg text-stone-300 italic">"{t(currentEnding.description)}"</p>
-                <div className="h-px w-full bg-stone-800"></div>
-                <p className="font-bold text-red-700">{t(currentEnding.cause)}</p>
+              <div className={`max-w-md p-6 border bg-stone-800/70 space-y-4
+                  ${gameState.ending === EndingType.E0_Fantasy ? 'border-amber-400/60 shadow-[0_0_25px_rgba(255,193,94,0.12)]' : 'border-stone-700/70'}`}>
+                <p className="text-lg text-stone-100 italic">"{t(currentEnding.description)}"</p>
+                <div className="h-px w-full bg-stone-700"></div>
+                <p className="font-bold text-red-500">{t(currentEnding.cause)}</p>
               </div>
 
               {/* True End Special Content: The Three Bubbles */}
               {gameState.ending === EndingType.True_End && (
                 <div className="w-full max-w-md space-y-6 mt-8 font-serif italic">
                   <div className="flex justify-start opacity-0 animate-fade-in" style={{animationDelay: '0.8s', animationFillMode: 'forwards'}}>
-                    <div className="bg-stone-800/50 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-700/50 max-w-[80%] leading-relaxed shadow-lg shadow-black/50">
+                    <div className="bg-stone-800/40 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-600/40 max-w-[80%] leading-relaxed shadow-lg shadow-black/30">
                       {t({
                         zh: "“对我来说，哥哥是我最喜欢的哥哥。”",
                         en: "\"To me, my brother is my favorite brother.\"",
@@ -356,7 +356,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex justify-start opacity-0 animate-fade-in" style={{animationDelay: '2.0s', animationFillMode: 'forwards'}}>
-                    <div className="bg-stone-800/50 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-700/50 max-w-[80%] leading-relaxed shadow-lg shadow-black/50">
+                    <div className="bg-stone-800/40 p-4 rounded-lg rounded-bl-none text-sm text-stone-300 border border-stone-600/40 max-w-[80%] leading-relaxed shadow-lg shadow-black/30">
                       {t({
                         zh: "“是个男子汉。”",
                         en: "\"He was a man.\"",
@@ -366,7 +366,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex justify-end opacity-0 animate-fade-in" style={{animationDelay: '3.5s', animationFillMode: 'forwards'}}>
-                    <div className="bg-red-950/20 p-4 rounded-lg rounded-br-none text-sm text-red-400 border border-red-900/30 max-w-[90%] text-right leading-relaxed shadow-lg shadow-red-900/10">
+                    <div className="bg-red-900/25 p-4 rounded-lg rounded-br-none text-sm text-red-300 border border-red-700/40 max-w-[90%] text-right leading-relaxed shadow-lg shadow-red-900/10">
                       {t({
                         zh: "“对我而言，统一教还是我最爱的统一教。”",
                         en: "\"To me, the Unification Church is still my beloved Unification Church.\"",
@@ -379,18 +379,18 @@ export default function App() {
               )}
 
               {gameState.ending === EndingType.True_End ? (
-                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto mt-8">
+                 <div className="text-xs font-mono text-stone-300 max-w-xs mx-auto mt-8">
                     {t(UI_TEXT.endingDate)}
                  </div>
               ) : (
-                 <div className="text-xs font-mono text-stone-500 max-w-xs mx-auto mt-8">
+                 <div className="text-xs font-mono text-stone-300 max-w-xs mx-auto mt-8">
                     {t(UI_TEXT.deadEnd)}
                  </div>
               )}
 
               <button
                 onClick={restart}
-                className="flex items-center gap-2 px-6 py-2 border border-stone-700 text-stone-400 hover:text-white hover:border-white transition-all text-sm uppercase tracking-widest mt-8"
+                className="flex items-center gap-2 px-6 py-2 border border-stone-500 text-stone-100 hover:text-white hover:border-amber-200 transition-all text-sm uppercase tracking-widest mt-8"
               >
                 <RefreshCw size={14} /> {t(UI_TEXT.restart)}
               </button>
