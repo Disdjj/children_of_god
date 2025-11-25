@@ -175,10 +175,10 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-stone-950 text-stone-300 overflow-hidden font-serif selection:bg-red-900 selection:text-white">
+    <div className="relative min-h-screen w-full bg-stone-950 text-stone-100 overflow-hidden font-serif selection:bg-red-900 selection:text-white">
       {/* CRT Overlay Effects */}
-      <div className="fixed inset-0 pointer-events-none z-50 scanlines opacity-50"></div>
-      <div className="fixed inset-0 pointer-events-none z-50 crt-flicker bg-gradient-to-b from-transparent to-black opacity-20"></div>
+      <div className="fixed inset-0 pointer-events-none z-50 scanlines opacity-30"></div>
+      <div className="fixed inset-0 pointer-events-none z-50 crt-flicker bg-gradient-to-b from-transparent to-black opacity-10"></div>
       
       {/* Main Content Area */}
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-2xl h-screen flex flex-col">
